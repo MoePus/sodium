@@ -20,7 +20,10 @@ import net.caffeinemc.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.data.SharedIndexSorter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class RenderRegionManager {
     private final Long2ReferenceOpenHashMap<RenderRegion> regions = new Long2ReferenceOpenHashMap<>();
@@ -74,6 +77,7 @@ public class RenderRegionManager {
 
                     if (storage != null) {
                         storage.removeVertexData(renderSectionIndex);
+                        region.clearCachedBatchFor(pass);
                     }
 
                     BuiltSectionMeshParts mesh = chunkBuildOutput.getMesh(pass);
@@ -90,12 +94,20 @@ public class RenderRegionManager {
                 if (sorter instanceof SharedIndexSorter sharedIndexSorter) {
                     var storage = region.createStorage(DefaultTerrainRenderPasses.TRANSLUCENT);
                     storage.removeIndexData(renderSectionIndex);
-                    storage.setSharedIndexUsage(renderSectionIndex, sharedIndexSorter.quadCount());
+
+                    // clear batch cache if it's newly using the shared index buffer and was not previously.
+                    // updates to the shared index buffer which cause the batch cache to be invalidated are handled with needsSharedIndexUpdate
+                    if (storage.setSharedIndexUsage(renderSectionIndex, sharedIndexSorter.quadCount())) {
+                        region.clearCachedBatchFor(DefaultTerrainRenderPasses.TRANSLUCENT);
+                    }
                 } else {
                     var storage = region.getStorage(DefaultTerrainRenderPasses.TRANSLUCENT);
                     if (storage != null) {
                         storage.removeIndexData(renderSectionIndex);
                         storage.setSharedIndexUsage(renderSectionIndex, 0);
+
+                        // always clear batch cache on uploads of new index data
+                        region.clearCachedBatchFor(DefaultTerrainRenderPasses.TRANSLUCENT);
                     }
 
                     if (sorter == null) {
@@ -130,6 +142,7 @@ public class RenderRegionManager {
             // Once invalidated the tessellation will be re-created on the next attempted use
             if (bufferChanged) {
                 region.refreshTesselation(commandList);
+                region.clearAllCachedBatches();
             }
 
             // Collect the upload results
@@ -158,6 +171,7 @@ public class RenderRegionManager {
 
         if (indexBufferChanged) {
             region.refreshIndexedTesselation(commandList);
+            region.clearCachedBatchFor(DefaultTerrainRenderPasses.TRANSLUCENT);
         }
     }
 
