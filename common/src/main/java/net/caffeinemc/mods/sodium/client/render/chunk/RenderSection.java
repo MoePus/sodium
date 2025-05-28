@@ -28,6 +28,7 @@ public class RenderSection {
 
     // Occlusion Culling State
     private long visibilityData = VisibilityEncoding.NULL;
+    private short[] portalData = new short[6];
 
     private int incomingDirections;
     private int lastVisibleFrame = -1;
@@ -151,10 +152,12 @@ public class RenderSection {
         var prevBuilt = this.built;
         var prevFlags = this.flags;
         var prevVisibilityData = this.visibilityData;
+        var prevPortalData = this.portalData.clone();
 
         this.built = true;
         this.flags = info.flags;
         this.visibilityData = info.visibilityData;
+        this.portalData = info.portalData.clone();
 
         this.globalBlockEntities = info.globalBlockEntities;
         this.culledBlockEntities = info.culledBlockEntities;
@@ -162,7 +165,7 @@ public class RenderSection {
 
         // the section is marked as having received graph-relevant changes if it's build state, flags, or connectedness has changed.
         // the entities and sprites don't need to be checked since whether they exist is encoded in the flags.
-        return !prevBuilt || prevFlags != this.flags || prevVisibilityData != this.visibilityData;
+        return !prevBuilt || prevFlags != this.flags || prevVisibilityData != this.visibilityData || !java.util.Arrays.equals(prevPortalData, this.portalData);
     }
 
     private boolean clearRenderState() {
@@ -315,6 +318,17 @@ public class RenderSection {
      */
     public long getVisibilityData() {
         return this.visibilityData;
+    }
+
+    /**
+     * Returns the encoded portal rectangles for this section.
+     *   0                  - This portal is completely closed
+     *   0xFFFF             - This portal is completely open
+     *   Other Value        - 4x4 bit: minU|minV|widthU|widthV
+     * Where width = encoded + 1, range 1-16.
+     */
+    public short[] getPortalData() {
+        return this.portalData;
     }
 
     /**

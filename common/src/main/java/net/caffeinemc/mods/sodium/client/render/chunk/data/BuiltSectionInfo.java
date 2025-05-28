@@ -3,6 +3,7 @@ package net.caffeinemc.mods.sodium.client.render.chunk.data;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.caffeinemc.mods.sodium.api.texture.SpriteUtil;
 import net.caffeinemc.mods.sodium.client.render.chunk.RenderSectionFlags;
+import net.caffeinemc.mods.sodium.client.render.chunk.compile.tasks.ExtraVisibilitySet;
 import net.caffeinemc.mods.sodium.client.render.chunk.occlusion.VisibilityEncoding;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import net.minecraft.client.renderer.chunk.VisibilitySet;
@@ -24,6 +25,7 @@ public class BuiltSectionInfo {
 
     public final int flags;
     public final long visibilityData;
+    public final short[] portalData = new short[6];
 
     public final BlockEntity @Nullable[] globalBlockEntities;
     public final BlockEntity @Nullable[] culledBlockEntities;
@@ -33,7 +35,7 @@ public class BuiltSectionInfo {
                              @NotNull Collection<BlockEntity> globalBlockEntities,
                              @NotNull Collection<BlockEntity> culledBlockEntities,
                              @NotNull Collection<TextureAtlasSprite> animatedSprites,
-                             @NotNull VisibilitySet occlusionData) {
+                             @NotNull ExtraVisibilitySet occlusionData) {
         this.globalBlockEntities = toArray(globalBlockEntities, BlockEntity[]::new);
         this.culledBlockEntities = toArray(culledBlockEntities, BlockEntity[]::new);
         this.animatedSprites = toArray(animatedSprites, TextureAtlasSprite[]::new);
@@ -55,6 +57,9 @@ public class BuiltSectionInfo {
         this.flags = flags;
 
         this.visibilityData = VisibilityEncoding.encode(occlusionData);
+        for(Direction direction : Direction.values()) {
+            this.portalData[direction.ordinal()] = occlusionData.getPortal(direction.ordinal());
+        }
     }
 
     public static class Builder {
@@ -63,13 +68,13 @@ public class BuiltSectionInfo {
         private final List<BlockEntity> culledBlockEntities = new ArrayList<>();
         private final Set<TextureAtlasSprite> animatedSprites = new ObjectOpenHashSet<>();
 
-        private VisibilitySet occlusionData;
+        private ExtraVisibilitySet occlusionData;
 
         public void addRenderPass(TerrainRenderPass pass) {
             this.blockRenderPasses.add(pass);
         }
 
-        public void setOcclusionData(VisibilitySet data) {
+        public void setOcclusionData(ExtraVisibilitySet data) {
             this.occlusionData = data;
         }
 
@@ -99,8 +104,8 @@ public class BuiltSectionInfo {
     }
 
     private static BuiltSectionInfo createEmptyData() {
-        VisibilitySet occlusionData = new VisibilitySet();
-        occlusionData.add(EnumSet.allOf(Direction.class));
+        ExtraVisibilitySet occlusionData = new ExtraVisibilitySet();
+        occlusionData.setAll(true);
 
         BuiltSectionInfo.Builder meshInfo = new BuiltSectionInfo.Builder();
         meshInfo.setOcclusionData(occlusionData);
