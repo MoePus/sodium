@@ -188,7 +188,7 @@ public class RenderSectionManager {
 
     private boolean isOutOfGraph(SectionPos pos) {
         var sectionY = pos.getY();
-        return this.level.getMinSectionY() <= sectionY && sectionY <= this.level.getMaxSectionY() && !this.sectionByPosition.containsKey(pos.asLong());
+        return this.level.getMinSection() <= sectionY && sectionY <= this.level.getMaxSection() && !this.sectionByPosition.containsKey(pos.asLong());
     }
 
     private float getSearchDistance() {
@@ -672,6 +672,9 @@ public class RenderSectionManager {
         }
 
         section.setPendingUpdate(joined, this.lastFrameAtTime);
+        
+        // mark graph as dirty so that it picks up the section's pending task
+        this.markGraphDirty();
 
         return true;
     }
