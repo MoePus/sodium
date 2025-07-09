@@ -1,6 +1,5 @@
 package net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.data;
 
-import net.caffeinemc.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.TQuad;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.bsp_tree.BSPNode;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.bsp_tree.BSPResult;
@@ -37,8 +36,8 @@ public class DynamicBSPData extends DynamicData {
     }
 
     @Override
-    public Sorter getSorter() {
-        return new DynamicBSPSorter(this.getQuadCount());
+    public DynamicSorter getSorter() {
+        return new DynamicBSPSorter(this.getQuadCount()); // index quad count
     }
 
     public static DynamicBSPData fromMesh(int vertexCount,

@@ -2,13 +2,13 @@ package net.caffeinemc.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.caffeinemc.mods.sodium.client.SodiumClientMod;
-import net.caffeinemc.mods.sodium.client.render.chunk.ExtendedBlockEntityType;
 import net.caffeinemc.mods.sodium.client.render.chunk.DefaultChunkRenderer;
+import net.caffeinemc.mods.sodium.client.render.chunk.ExtendedBlockEntityType;
 import net.caffeinemc.mods.sodium.client.render.chunk.RenderSection;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
-import net.caffeinemc.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
+import net.caffeinemc.mods.sodium.client.render.chunk.compile.estimation.MeshTaskSizeEstimator;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderCache;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
 import net.caffeinemc.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
  * to graphics memory on the main thread.
- *
+ * <p>
  * This task takes a slice of the level from the thread it is created on. Since these slices require rather large
  * array allocations, they are pooled to ensure that the garbage collector doesn't become overloaded.
  */
@@ -225,7 +225,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
     }
 
     @Override
-    public int getEffort() {
-        return ChunkBuilder.HIGH_EFFORT;
+    public long estimateTaskSizeWith(MeshTaskSizeEstimator estimator) {
+        return estimator.estimateSize(this.render);
     }
 }
