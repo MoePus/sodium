@@ -1,6 +1,5 @@
 package net.caffeinemc.mods.sodium.client.render.chunk;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceMap;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceMaps;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
@@ -47,6 +46,7 @@ import net.caffeinemc.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -104,7 +104,7 @@ public class RenderSectionManager {
     private long lastFrameAtTime = System.nanoTime();
     private static final float FRAME_DURATION_UPDATE_RATIO = 0.05f;
 
-    private boolean needsGraphUpdate;
+    private boolean needsGraphUpdate = true;
     private int lastUpdatedFrame;
 
     private @Nullable Vector3dc cameraPosition;
@@ -117,7 +117,6 @@ public class RenderSectionManager {
         this.level = level;
         this.builder = new ChunkBuilder(level, ChunkMeshFormats.COMPACT);
 
-        this.needsGraphUpdate = true;
         this.renderDistance = renderDistance;
 
         this.sortTriggering = new SortTriggering();
@@ -153,15 +152,13 @@ public class RenderSectionManager {
         this.cameraPosition = cameraPosition;
     }
 
-    public void update(Camera camera, Viewport viewport, boolean spectator) {
+    public void update(Camera camera, Viewport viewport, FogParameters fogParameters, boolean spectator) {
         this.lastUpdatedFrame += 1;
 
-        this.createTerrainRenderList(camera, viewport, this.lastUpdatedFrame, spectator);
-
-        this.needsGraphUpdate = false;
+        this.needsGraphUpdate = this.createTerrainRenderList(camera, viewport, fogParameters, this.lastUpdatedFrame, spectator);
     }
 
-    private void createTerrainRenderList(Camera camera, Viewport viewport, int frame, boolean spectator) {
+    private boolean createTerrainRenderList(Camera camera, Viewport viewport, int frame, boolean spectator) {
         this.resetRenderLists();
 
         final var searchDistance = this.getSearchDistance();
