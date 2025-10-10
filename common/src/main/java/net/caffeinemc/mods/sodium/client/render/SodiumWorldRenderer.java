@@ -17,6 +17,7 @@ import net.caffeinemc.mods.sodium.client.render.chunk.lists.SortedRenderLists;
 import net.caffeinemc.mods.sodium.client.render.chunk.map.ChunkTracker;
 import net.caffeinemc.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
+import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.SortBehavior;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.trigger.CameraMovement;
 import net.caffeinemc.mods.sodium.client.render.viewport.Viewport;
 import net.caffeinemc.mods.sodium.client.services.PlatformBlockAccess;
@@ -241,6 +242,10 @@ public class SodiumWorldRenderer {
             }
         }
 
+        profiler.popPush("chunk_render_lists");
+        
+        this.renderSectionManager.finalizeRenderLists(viewport);
+
         profiler.popPush("chunk_render_tick");
 
         this.renderSectionManager.tickVisibleRenders();
@@ -286,7 +291,7 @@ public class SodiumWorldRenderer {
 
         this.renderDistance = this.client.options.getEffectiveRenderDistance();
 
-        this.renderSectionManager = new RenderSectionManager(this.level, this.renderDistance, commandList);
+        this.renderSectionManager = new RenderSectionManager(this.level, this.renderDistance, SortBehavior.DYNAMIC_DEFER_NEARBY_ZERO_FRAMES, commandList);
 
         var tracker = ChunkTrackerHolder.get(this.level);
         ChunkTracker.forEachChunk(tracker.getReadyChunks(), this.renderSectionManager::onChunkAdded);
