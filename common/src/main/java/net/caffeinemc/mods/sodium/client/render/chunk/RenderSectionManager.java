@@ -118,14 +118,14 @@ public class RenderSectionManager {
 
     private final RemovableMultiForest renderableSectionTree;
 
-    public RenderSectionManager(ClientLevel level, int renderDistance, SortBehavior sortBehavior, CommandList commandList) {
+    public RenderSectionManager(ClientLevel level, int renderDistance, CommandList commandList) {
         this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, ChunkMeshFormats.COMPACT);
 
         this.level = level;
         this.builder = new ChunkBuilder(level, ChunkMeshFormats.COMPACT);
 
         this.renderDistance = renderDistance;
-        this.sortBehavior = sortBehavior;
+        this.sortBehavior = SortBehavior.DYNAMIC_DEFER_NEARBY_ZERO_FRAMES;
 
         this.sortTriggering = new SortTriggering();
 
