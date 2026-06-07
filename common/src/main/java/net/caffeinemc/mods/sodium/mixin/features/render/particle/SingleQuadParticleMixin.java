@@ -100,7 +100,7 @@ public abstract class SingleQuadParticleMixin extends Particle {
      */
     @Inject(method = "renderRotatedQuad(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;Lorg/joml/Quaternionf;F)V", at = @At("HEAD"), cancellable = true)
     protected void renderRotatedQuad(VertexConsumer vertexConsumer, Camera camera, Quaternionf quaternion, float tickDelta, CallbackInfo ci) {
-        final var writer = VertexConsumerUtils.convertOrLog(vertexConsumer);
+        final var writer = VertexConsumerUtils.convertParticle(vertexConsumer);
 
         if (writer == null) {
             return;
