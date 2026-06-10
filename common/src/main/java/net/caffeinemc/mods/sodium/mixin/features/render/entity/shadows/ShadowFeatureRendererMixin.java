@@ -45,7 +45,7 @@ public class ShadowFeatureRendererMixin {
     private static void renderShadowPartFast(SubmitNodeCollection submitNodeCollection, MultiBufferSource.BufferSource bufferSource, CallbackInfo ci) {
         VertexConsumer vertices = bufferSource.getBuffer(SHADOW_RENDER_TYPE);
 
-        var writer = VertexConsumerUtils.convertOrLog(vertices);
+        var writer = VertexConsumerUtils.convertOrLog(vertices, EntityVertex.FORMAT);
 
         if (writer == null) {
             return;

@@ -34,7 +34,7 @@ public abstract class QuadParticleRenderStateMixin {
                           float size,
                           float u0, float u1, float v0, float v1,
                           int color, int light, CallbackInfo ci) {
-        final var writer = VertexConsumerUtils.convertOrLog(vertexConsumer);
+        final var writer = VertexConsumerUtils.convertOrLog(vertexConsumer, ParticleVertex.FORMAT);
 
         if (writer == null) {
             return;
